@@ -1,5 +1,5 @@
 # EndlessScan
-Small utility for endless scanning of documents designed for headless use to integrate into paperless-ng.
+Small utility for endless scanning of documents with EPSON scanners designed for headless use to interface with paperless-ng.
 
 ## Requirements
 This script makes use of [epsonscan2](https://support.epson.net/linux/en/epsonscan2.php) (es2).
