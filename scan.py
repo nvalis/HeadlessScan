@@ -6,8 +6,8 @@ import datetime
 import shutil
 import logging
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
-logger.level = logging.DEBUG
 
 
 def read_base_config(baseconfig_file):
@@ -19,7 +19,7 @@ def read_base_config(baseconfig_file):
 def write_scan_config(config, out_file):
     with open(out_file, "w") as cf:
         json.dump(config, cf)
-    logger.debug("Wrote scan config to {out_file}.")
+    logger.debug(f"Wrote scan config to {out_file}.")
 
 
 def epsonscan2(settings_file):
@@ -54,6 +54,7 @@ def main():
         i += 1
         conf_preset["FileNamePrefix"]["string"] = f"scan{i:03}"
         write_scan_config(base_config, out_file=tmp_config)
+        logger.debug(f'Scanning {conf_preset["FileNamePrefix"]["string"]}.png...')
         epsonscan2(tmp_config)
 
     # shutil.rmtree(tmp_path)
