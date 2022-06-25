@@ -4,10 +4,21 @@ import json
 import pathlib
 import datetime
 import shutil
+from enum import Enum
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s: %(levelname)10s - %(message)s", level=logging.INFO
+)
 logger = logging.getLogger()
+
+
+class ES2_STATUS(Enum):
+    DEVICE_NOT_FOUND = b"ERROR : Device is not found...\n"
+    CONNECTION_ERROR = b"ERROR : Unable to send data. Check the connection to the scanner and try again.\n"
+    UNEXPECTED_ERROR = b"ERROR : An unexpected error occurred. Epson Scan 2 will close."
+    NO_DOCUMENT = b"ERROR : Load the originals in the ADF.\n"
+    ALL_OKAY = b""
 
 
 def read_base_config(baseconfig_file):
@@ -23,9 +34,12 @@ def write_scan_config(config, out_file):
 
 
 def epsonscan2(settings_file):
-    """Run: epsonscan2 -s settings.sf2"""
-    subprocess.run(["epsonscan2", "-s", settings_file])
+    """Run epsonscan2"""
     logger.info("Scanning...")
+    proc = subprocess.Popen(["epsonscan2", "-s", settings_file], stdout=subprocess.PIPE)
+    stdout = proc.communicate()[0]
+    logger.debug(f'epsonscan2 returned: "{str(stdout)}"')
+    return stdout
 
 
 def main():
@@ -49,13 +63,29 @@ def main():
     conf_preset = base_config["Preset"][0]["0"][0]
     conf_preset["UserDefinePath"]["string"] = str(tmp_path)
 
-    i = 0
+    page = 1
     while True:
-        i += 1
-        conf_preset["FileNamePrefix"]["string"] = f"scan{i:03}"
+        conf_preset["FileNamePrefix"]["string"] = f"scan{page:03}"
         write_scan_config(base_config, out_file=tmp_config)
         logger.debug(f'Scanning {conf_preset["FileNamePrefix"]["string"]}.png...')
-        epsonscan2(tmp_config)
+        stdout = epsonscan2(tmp_config)
+
+        if stdout == ES2_STATUS.ALL_OKAY.value:
+            logger.info(
+                f'Successfully scanned {conf_preset["FileNamePrefix"]["string"]}'
+            )
+            page += 1
+        elif stdout == ES2_STATUS.DEVICE_NOT_FOUND.value:
+            logger.error("Scanner device not found!")
+        elif stdout == ES2_STATUS.CONNECTION_ERROR.value:
+            logger.error("Connection error to scanner!")
+        elif stdout == ES2_STATUS.UNEXPECTED_ERROR.value:
+            logger.error("epsonscan2 unexpectedly closed")
+        elif stdout == ES2_STATUS.NO_DOCUMENT.value:
+            logger.warning("No document in scanner...")
+        else:
+            logger.critical(f'Unknown epsonscan2 status: "{str(stdout)}"')
+            page += 1
 
     # shutil.rmtree(tmp_path)
 
