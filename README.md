@@ -2,7 +2,7 @@
 Small utility for endless scanning of documents with EPSON scanners designed for headless use to interface with paperless-ng.
 
 ## Requirements
-This script makes use of [epsonscan2](https://support.epson.net/linux/en/epsonscan2.php) (es2).
+This script makes use of [epsonscan2](https://support.epson.net/linux/en/epsonscan2.php) (es2). The conversion to a multipage PDF file is using [imagemagick `convert`](https://www.imagemagick.org/script/convert.php).
 
 ## Config file
 The file [`settings.json`](settings.json) serves as a base config file which is used to run es2. It's adopted to my my Epson ES-50 scanner. With other hardware you might have to create your own config file using `epsonscan2 -c`.
