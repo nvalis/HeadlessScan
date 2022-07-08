@@ -1,0 +1,13 @@
+[Unit]
+Description=Start Scanner Service
+
+[Service]
+ExecStart=/opt/EndlessScan/scan.py settings.json
+StandardError=syslog
+SyslogIdentifier=piservice
+User=scanner
+Group=scanner
+WorkingDirectory=/opt/EndlessScan/
+
+[Install]
+WantedBy=basic.target
