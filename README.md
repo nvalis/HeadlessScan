@@ -1,4 +1,4 @@
-# EndlessScan
+# HeadlessScan
 Small utility for endless scanning of documents with EPSON scanners designed for headless use to interface with paperless-ng.
 
 ## Requirements
